@@ -29,3 +29,15 @@ jobs:
 
     - name: Verify pushed image
       run: docker pull ${{ secrets.DOCKER_USERNAME }}/week-18-class:latest
+
+    - name: Deploy to ec2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo docker pull ${{ secrets.DOCKER_USERNAME }}/week-18-class:latest
+          sudo docker stop week-18-class || true
+          sudo docker rm week-18-class || true
+          sudo docker run -d --name web-app -p 3005:3000 ${{ secrets.DOCKER_USERNAME }}/week-18-class:latest
